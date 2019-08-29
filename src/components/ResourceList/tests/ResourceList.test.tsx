@@ -6,12 +6,14 @@ import {
   EmptySearchResult,
   ResourceItem,
   EventListener,
+  Button,
 } from 'components';
 import {
   findByTestID,
   mountWithAppProvider,
   trigger,
 } from 'test-utilities/legacy';
+
 import {BulkActions, CheckableButton} from '../components';
 
 const itemsNoID = [{url: 'item 1'}, {url: 'item 2'}];
@@ -23,6 +25,7 @@ const itemsWithID = [
   {id: '6', name: 'item 2', url: 'www.test.com', title: 'title 2'},
   {id: '7', name: 'item 3', url: 'www.test.com', title: 'title 3'},
 ];
+const allSelectedIDs = ['5', '6', '7'];
 const promotedBulkActions = [{content: 'action'}, {content: 'action 2'}];
 const bulkActions = [{content: 'action 3'}, {content: 'action 4'}];
 const sortOptions = [
@@ -749,6 +752,118 @@ describe('<ResourceList />', () => {
       resourceList.setProps({selectedItems: []});
       resourceList.update();
       expect(resourceList.find(BulkActions).prop('selectMode')).toBe(false);
+    });
+
+    describe('focus', () => {
+      describe('large screen', () => {
+        it('focuses the checkbox in the bulk action when the plain CheckableButton is clicked', () => {
+          const resourceList = mountWithAppProvider(
+            <ResourceList
+              items={itemsWithID}
+              renderItem={renderItem}
+              promotedBulkActions={promotedBulkActions}
+            />,
+          );
+
+          const selectAllCheckableButton = resourceList.findWhere(
+            (wrap) => wrap.is(CheckableButton) && wrap.prop('plain') === true,
+          );
+
+          trigger(selectAllCheckableButton, 'onToggleAll');
+
+          const deselectAllCheckbox = resourceList
+            .findWhere(
+              (wrap) => wrap.is(CheckableButton) && !wrap.prop('plain'),
+            )
+            .find('input[type="checkbox"]');
+
+          expect(deselectAllCheckbox.getDOMNode()).toBe(document.activeElement);
+        });
+
+        it('focuses the plain CheckableButton checkbox when items are selected and the deselect Checkable button the is clicked', () => {
+          const resourceList = mountWithAppProvider(
+            <ResourceList
+              items={itemsWithID}
+              renderItem={renderItem}
+              selectedItems={allSelectedIDs}
+              promotedBulkActions={promotedBulkActions}
+            />,
+          );
+
+          const deselectAllCheckableButton = resourceList.findWhere(
+            (wrap) => wrap.is(CheckableButton) && !wrap.prop('plain'),
+          );
+
+          trigger(deselectAllCheckableButton, 'onToggleAll');
+
+          const selectAllCheckableCheckbox = resourceList
+            .findWhere(
+              (wrap) => wrap.is(CheckableButton) && wrap.prop('plain') === true,
+            )
+            .find('input[type="checkbox"]');
+
+          expect(selectAllCheckableCheckbox.getDOMNode()).toBe(
+            document.activeElement,
+          );
+        });
+      });
+
+      describe('small screen', () => {
+        afterEach(() => {
+          setDefaultScreen();
+        });
+
+        it('keeps focus on the CheckableButton checkbox when selecting', () => {
+          setSmallScreen();
+
+          const resourceList = mountWithAppProvider(
+            <ResourceList
+              items={itemsWithID}
+              renderItem={renderItem}
+              promotedBulkActions={promotedBulkActions}
+            />,
+          );
+
+          trigger(resourceList.find(Button), 'onClick');
+
+          const selectAllCheckableButton = resourceList.findWhere(
+            (wrap) => wrap.is(CheckableButton) && !wrap.prop('plain'),
+          );
+
+          trigger(selectAllCheckableButton, 'onToggleAll');
+
+          const checkBox = selectAllCheckableButton.find(
+            'input[type="checkbox"]',
+          );
+
+          expect(checkBox.getDOMNode()).toBe(document.activeElement);
+        });
+
+        it('keeps focus on the CheckableButton checkbox when deselecting', () => {
+          setSmallScreen();
+
+          const resourceList = mountWithAppProvider(
+            <ResourceList
+              items={itemsWithID}
+              selectedItems={allSelectedIDs}
+              renderItem={renderItem}
+              promotedBulkActions={promotedBulkActions}
+            />,
+          );
+
+          const deselectAllCheckableButton = resourceList.findWhere(
+            (wrap) => wrap.is(CheckableButton) && !wrap.prop('plain'),
+          );
+
+          trigger(deselectAllCheckableButton, 'onToggleAll');
+
+          const checkBox = deselectAllCheckableButton.find(
+            'input[type="checkbox"]',
+          );
+
+          expect(checkBox.getDOMNode()).toBe(document.activeElement);
+        });
+      });
     });
   });
 

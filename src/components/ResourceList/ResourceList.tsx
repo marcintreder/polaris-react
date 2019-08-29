@@ -16,6 +16,9 @@ import {
   ResourceListContext,
   ResourceListSelectedItems,
   SELECT_ALL_ITEMS,
+  CheckableButtonKey,
+  CheckableButtonNode,
+  CheckableButtons,
 } from '../../utilities/resource-list';
 import {Select, SelectOption} from '../Select';
 import {EmptySearchResult} from '../EmptySearchResult';
@@ -42,6 +45,7 @@ interface State {
   loadingPosition: number;
   lastSelected: number | null;
   smallScreen: boolean;
+  checkableButtons: CheckableButtons;
 }
 
 export interface ResourceListProps {
@@ -137,6 +141,7 @@ class ResourceList extends React.Component<CombinedProps, State> {
       loadingPosition: 0,
       lastSelected: null,
       smallScreen: isSmallScreen(),
+      checkableButtons: new Map(),
     };
   }
 
@@ -375,7 +380,6 @@ class ResourceList extends React.Component<CombinedProps, State> {
       polaris: {intl},
     } = this.props;
     const {selectMode, loadingPosition, smallScreen} = this.state;
-
     const filterControlMarkup = filterControl ? (
       <div className={styles.FiltersWrapper}>{filterControl}</div>
     ) : null;
@@ -394,6 +398,7 @@ class ResourceList extends React.Component<CombinedProps, State> {
           paginatedSelectAllText={this.paginatedSelectAllText}
           actions={bulkActions}
           disabled={loading}
+          smallScreen={smallScreen}
         />
       </div>
     ) : null;
@@ -558,6 +563,7 @@ class ResourceList extends React.Component<CombinedProps, State> {
       resourceName,
       loading,
       onSelectionChange: this.handleSelectionChange,
+      registerCheckableButtons: this.handleCheckableButtonRegistration,
     };
 
     return (
@@ -643,6 +649,17 @@ class ResourceList extends React.Component<CombinedProps, State> {
     return this.props.items.slice(min, max + 1).map(resolveItemId);
   };
 
+  private handleCheckableButtonRegistration = (
+    key: CheckableButtonKey,
+    button: CheckableButtonNode,
+  ) => {
+    this.setState(({checkableButtons}) => {
+      return {
+        checkableButtons: new Map(checkableButtons).set(key, button),
+      };
+    });
+  };
+
   private handleSelectionChange = (
     selected: boolean,
     id: string,
@@ -723,6 +740,7 @@ class ResourceList extends React.Component<CombinedProps, State> {
       idForItem = defaultIdForItem,
     } = this.props;
 
+    const {checkableButtons} = this.state;
     let newlySelectedItems: string[] = [];
 
     if (
@@ -746,6 +764,16 @@ class ResourceList extends React.Component<CombinedProps, State> {
     if (onSelectionChange) {
       onSelectionChange(newlySelectedItems);
     }
+
+    let checkbox;
+    if (isSmallScreen()) {
+      checkbox = checkableButtons.get('bulkSm');
+    } else if (newlySelectedItems.length === 0) {
+      checkbox = checkableButtons.get('plain');
+    } else {
+      checkbox = checkableButtons.get('bulkLg');
+    }
+    checkbox && checkbox.focus();
   };
 }
 
