@@ -1,115 +1,438 @@
-import tokens from '@shopify/polaris-tokens';
-import {HSLColor} from '../color-types';
-import {colorToHsla, hslToString, hslToRgb} from '../color-transformers';
+import {HSLColor, HSLAColor} from '../color-types';
+import {
+  colorToHsla,
+  hslToString,
+  hslToRgb,
+  rgbToHex,
+} from '../color-transformers';
 import {isLight} from '../color-validation';
 import {constructColorName} from '../color-names';
-import {createLightColor} from '../color-manipulation';
+import {lightenColor, darkenColor, opacifyColor} from '../color-manipulation';
 import {compose} from '../compose';
 
-import {Theme, ColorsToParse, ThemeVariant, ThemeColors} from './types';
-import {needsVariantList} from './config';
+import {CSSProperties, ComponentThemeProperties, Theme} from './types';
 
-export function setColors(theme: Theme | undefined): string[][] | undefined {
-  let colorPairs;
-  if (theme && theme.colors) {
-    Object.entries(theme.colors).forEach(([colorKey, pairs]) => {
-      const colorKeys = Object.keys(pairs);
-      if (colorKey === 'topBar' && colorKeys.length > 1) {
-        colorPairs = colorKeys.map((key: string) => {
-          const colors = (theme.colors as ThemeColors).topBar;
-          return [constructColorName(colorKey, key), colors[key]];
-        });
-      } else {
-        colorPairs = parseColors([colorKey, pairs]);
-      }
-    });
-  }
+const NAMESPACE = 'polaris';
 
-  return colorPairs;
-}
+const defaultRoleValues = {
+  surface: '#0c0d0e',
+  brand: '#008060',
+  interaction: '#2A94FF',
+  negative: '#C43256',
+  timeliness: '#90DFD6',
+  warning: '#FFA781',
+  attention: '#FFC453',
+};
 
-export function needsVariant(name: string) {
-  return needsVariantList.indexOf(name) !== -1;
-}
-
-const lightenToString: (
-  color: HSLColor | string,
-  lightness: number,
-  saturation: number,
-) => string = compose(
-  hslToString,
-  createLightColor,
+const hslToHex: (color: HSLColor | HSLAColor) => string = compose(
+  rgbToHex,
+  hslToRgb,
 );
 
-export function setTextColor(
-  name: string,
-  variant: ThemeVariant = 'dark',
-): string[] {
-  if (variant === 'light') {
-    return [name, tokens.colorInk];
-  }
+type LightnessKeys = 'opposing' | 'base' | 'icon' | 'subdued' | 'disabled';
 
-  return [name, tokens.colorWhite];
+const lightness: {[Key in LightnessKeys]: [number, number]} = {
+  opposing: [1, 99],
+  base: [5, 95],
+  icon: [10, 90],
+  subdued: [15, 85],
+  disabled: [20, 80],
+};
+
+const alpha = 1.0;
+
+export function setColors(theme: Theme) {
+  return new SchemeFactory(theme).scheme;
 }
 
-export function setTheme(
-  color: string | HSLColor,
-  baseName: string,
-  key: string,
-  variant: 'light' | 'dark',
-): string[][] {
-  const colorPairs = [];
-  switch (variant) {
-    case 'light':
-      colorPairs.push(
-        setTextColor(constructColorName(baseName, null, 'color'), 'light'),
-      );
+class SchemeFactory {
+  scheme: CSSProperties = {};
 
-      colorPairs.push([
-        constructColorName(baseName, key, 'lighter'),
-        lightenToString(color, 7, -10),
-      ]);
+  private isLightTheme: boolean;
 
-      break;
-    case 'dark':
-      colorPairs.push(
-        setTextColor(constructColorName(baseName, null, 'color'), 'dark'),
-      );
+  constructor(theme: Theme) {
+    const {colors} = theme;
+    const surface =
+      colors == null || colors.surface == null
+        ? defaultRoleValues.surface
+        : colors.surface;
 
-      colorPairs.push([
-        constructColorName(baseName, key, 'lighter'),
-        lightenToString(color, 15, 15),
-      ]);
-
-      break;
-    default:
+    this.setScheme(theme);
+    this.isLightTheme = isLight(hslToRgb(colorToHsla(surface) as HSLColor));
   }
 
-  return colorPairs;
-}
+  private setScheme(theme: Theme) {
+    this.scheme = this.setColors(theme);
+  }
 
-function parseColors([baseName, colors]: [string, ColorsToParse]): string[][] {
-  const keys = Object.keys(colors);
-  const colorPairs = [];
-  for (let i = 0; i < keys.length; i++) {
-    colorPairs.push([constructColorName(baseName, keys[i]), colors[keys[i]]]);
+  private setColors(theme: Theme): CSSProperties {
+    const {colors = {}} = theme;
+    const {createRoleRange, createSurfaceRange} = this;
+    const {
+      surface = defaultRoleValues.surface,
+      brand = defaultRoleValues.brand,
+      interaction = defaultRoleValues.interaction,
+      negative = defaultRoleValues.negative,
+      positive = defaultRoleValues.brand,
+      timeliness = defaultRoleValues.timeliness,
+      warning = defaultRoleValues.warning,
+      attention = defaultRoleValues.attention,
+    } = colors;
 
-    if (needsVariant(baseName)) {
-      const hslColor = colorToHsla(colors[keys[i]]);
+    return {
+      ...createSurfaceRange(surface),
+      ...createRoleRange(brand, 'brand', {generateDarkenedValues: true}),
+      ...createRoleRange(interaction, 'interaction', {
+        generateDarkenedValues: true,
+      }),
+      ...createRoleRange(timeliness, 'timeliness', {
+        generateDarkenedValues: true,
+      }),
+      ...createRoleRange(positive, 'positive', {generateDarkenedValues: true}),
+      ...createRoleRange(attention, 'attention', {
+        generateDarkenedValues: true,
+      }),
+      ...createRoleRange(warning, 'warning', {generateDarkenedValues: true}),
+      ...createRoleRange(negative, 'negative', {generateDarkenedValues: true}),
+    };
+  }
 
-      if (typeof hslColor === 'string') {
-        return colorPairs;
-      }
+  private createRoleRange = (
+    baseColor: string,
+    colorRole: string,
+    options?: {
+      darkenedStops?: number;
+      lightenedStops?: number;
+      increment?: number;
+      generateOpaqueValues?: boolean;
+      generateLightenedValues?: boolean;
+      generateDarkenedValues?: boolean;
+      generateSurfaceValues?: boolean;
+    },
+  ): CSSProperties => {
+    const {
+      generateOpaqueValues = false,
+      generateLightenedValues = false,
+      generateDarkenedValues = false,
+      generateSurfaceValues = false,
+      darkenedStops = 2,
+      lightenedStops = 2,
+      increment = 10,
+    } = options || {};
+    const {isLightTheme} = this;
+    const hslBaseColor = colorToHsla(baseColor) as HSLColor;
 
-      const rgbColor = hslToRgb(hslColor);
+    const onBase = {
+      [constructColorName(NAMESPACE, colorRole, 'on')]: hslToString({
+        hue: hslBaseColor.hue,
+        saturation: hslBaseColor.saturation,
+        lightness: isLightTheme ? lightness.base[0] : lightness.base[1],
+        alpha,
+      }),
+      [constructColorName(NAMESPACE, colorRole, 'iconOn')]: hslToString({
+        hue: hslBaseColor.hue,
+        saturation: hslBaseColor.saturation,
+        lightness: isLightTheme ? lightness.icon[0] : lightness.icon[1],
+        alpha,
+      }),
+      [constructColorName(NAMESPACE, colorRole, 'subduedOn')]: hslToString({
+        hue: hslBaseColor.hue,
+        saturation: hslBaseColor.saturation,
+        lightness: isLightTheme ? lightness.subdued[0] : lightness.subdued[1],
+        alpha,
+      }),
+      [constructColorName(NAMESPACE, colorRole, 'disabledOn')]: hslToString({
+        hue: hslBaseColor.hue,
+        saturation: hslBaseColor.saturation,
+        lightness: isLightTheme ? lightness.disabled[0] : lightness.disabled[1],
+        alpha,
+      }),
+    };
 
-      if (isLight(rgbColor)) {
-        colorPairs.push(...setTheme(hslColor, baseName, keys[i], 'light'));
-      } else {
-        colorPairs.push(...setTheme(hslColor, baseName, keys[i], 'dark'));
-      }
+    const surface = {
+      hue: hslBaseColor.hue,
+      saturation: hslBaseColor.saturation,
+      lightness: isLightTheme ? lightness.base[0] : lightness.base[1],
+      alpha,
+    };
+
+    const onSurface = {
+      [constructColorName(NAMESPACE, colorRole, 'onSurface')]: hslToString({
+        hue: surface.hue,
+        saturation: surface.saturation,
+        lightness: !isLightTheme ? lightness.base[0] : lightness.base[1],
+        alpha,
+      }),
+      [constructColorName(NAMESPACE, colorRole, 'iconOnSurface')]: hslToString({
+        hue: surface.hue,
+        saturation: surface.saturation,
+        lightness: !isLightTheme ? lightness.icon[0] : lightness.icon[1],
+        alpha,
+      }),
+      [constructColorName(
+        NAMESPACE,
+        colorRole,
+        'subduedOnSurface',
+      )]: hslToString({
+        hue: surface.hue,
+        saturation: surface.saturation,
+        lightness: !isLightTheme ? lightness.subdued[0] : lightness.subdued[1],
+        alpha,
+      }),
+      [constructColorName(
+        NAMESPACE,
+        colorRole,
+        'disabledOnSurface',
+      )]: hslToString({
+        hue: surface.hue,
+        saturation: surface.saturation,
+        lightness: !isLightTheme
+          ? lightness.disabled[0]
+          : lightness.disabled[1],
+        alpha,
+      }),
+    };
+
+    return {
+      ...{
+        [constructColorName(NAMESPACE, colorRole)]: hslToString(colorToHsla(
+          baseColor,
+        ) as HSLAColor),
+      },
+      ...onBase,
+      ...(generateLightenedValues &&
+        createLightRange(
+          lightenedStops,
+          colorRole,
+          hslBaseColor as HSLColor,
+          increment,
+        )),
+      ...(generateDarkenedValues &&
+        createDarkRange(
+          darkenedStops,
+          colorRole,
+          hslBaseColor as HSLColor,
+          increment,
+        )),
+      ...(generateSurfaceValues && {
+        [constructColorName(NAMESPACE, colorRole, 'surface')]: hslToString(
+          surface,
+        ),
+      }),
+      ...(generateSurfaceValues && onSurface),
+      ...(generateOpaqueValues && createOpaqueRange(baseColor, colorRole)),
+    };
+  };
+
+  private createSurfaceRange = (baseColor: string): CSSProperties => {
+    const hslBaseColor: HSLColor = colorToHsla(baseColor) as HSLColor;
+    const {isLightTheme} = this;
+
+    let greyRange: CSSProperties;
+
+    const colorRole = 'surface';
+    const stops = 9;
+    const increment = 10;
+    const options = {suffix: ''};
+
+    if (isLightTheme) {
+      greyRange = createDarkRange(
+        stops,
+        colorRole,
+        hslBaseColor,
+        increment,
+        options,
+      );
+    } else {
+      greyRange = createLightRange(
+        stops,
+        colorRole,
+        hslBaseColor,
+        increment,
+        options,
+      );
     }
-  }
 
-  return colorPairs;
+    const opposingColor = hslToHex({
+      hue: hslBaseColor.hue,
+      saturation: hslBaseColor.saturation,
+      lightness: isLightTheme ? 1 : 99,
+    });
+
+    function getOnColor(baseIsLight: boolean) {
+      return hslToString({
+        hue: hslBaseColor.hue,
+        saturation: hslBaseColor.saturation,
+        lightness: baseIsLight ? 1 : 99,
+        alpha,
+      });
+    }
+
+    const on = {
+      [constructColorName(NAMESPACE, colorRole, 'onDark')]: getOnColor(false),
+      [constructColorName(NAMESPACE, colorRole, 'onLight')]: getOnColor(true),
+      [constructColorName(NAMESPACE, colorRole, 'onBase')]: getOnColor(
+        isLightTheme,
+      ),
+      [constructColorName(NAMESPACE, colorRole, 'onOpposing')]: getOnColor(
+        !isLightTheme,
+      ),
+    };
+
+    //   - shade
+    //     - one darkened stop
+    //   - border
+    //     - one darkened stop
+    //
+    //   - base
+    //     - foreground
+    //     - background
+    //   - on base
+    //     - subdued
+    //     - icon
+    //     - disabled
+    //   - base opacified
+    //
+    //   - opposing (opposite of base)
+    //   - on opposing
+    //     - subdued
+    //     - icon
+    //     - disabled
+    //   - opposing opacified
+    //
+    //   - range of grays for interactive elements (5-10?)
+
+    return {
+      ...{
+        [constructColorName(NAMESPACE, colorRole, '0')]: baseColor,
+      },
+      ...greyRange,
+      ...createOpaqueRange(baseColor, colorRole, {
+        suffix: 'baseOpacified',
+      }),
+      ...createOpaqueRange(opposingColor, colorRole, {
+        suffix: 'opposingOpacified',
+      }),
+      ...on,
+    };
+  };
+}
+
+function createLightRange(
+  stops: number,
+  colorRole: string,
+  hslBaseColor: HSLColor,
+  increment: number,
+  options?: {
+    suffix?: string;
+  },
+): CSSProperties {
+  const {suffix = 'lightened'} = options || {};
+  return Array.from({length: stops}, (_, i) => i + 1).reduce(
+    (colorStyles: CSSProperties, stop) => {
+      const color = hslToHex(lightenColor(
+        hslBaseColor,
+        increment * stop,
+      ) as HSLColor);
+      colorStyles[
+        constructColorName(NAMESPACE, colorRole, `${suffix}${stop}`)
+      ] = color;
+      return colorStyles;
+    },
+    {},
+  );
+}
+
+function createDarkRange(
+  stops: number,
+  colorRole: string,
+  hslBaseColor: HSLColor,
+  increment: number,
+  options?: {
+    suffix?: string;
+  },
+): CSSProperties {
+  const {suffix = 'darkened'} = options || {};
+  return Array.from({length: stops}, (_, i) => i + 1).reduce(
+    (colorStyles: CSSProperties, stop) => {
+      const color = hslToString(darkenColor(
+        hslBaseColor,
+        increment * stop,
+      ) as HSLAColor);
+      colorStyles[
+        constructColorName(NAMESPACE, colorRole, `${suffix}${stop}`)
+      ] = color;
+      return colorStyles;
+    },
+    {},
+  );
+}
+
+function createOpaqueRange(
+  baseColor: string,
+  colorRole: string,
+  options?: {
+    suffix?: string;
+  },
+): CSSProperties {
+  const {hue, saturation, lightness} = colorToHsla(baseColor) as HSLColor;
+  const {suffix = 'opacified'} = options || {};
+  return [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9].reduce(
+    (colorStyles: CSSProperties, stop) => {
+      colorStyles[
+        constructColorName(
+          NAMESPACE,
+          colorRole,
+          `${suffix}${stop.toString().split('0.')[1]}`,
+        )
+      ] = hslToString(
+        opacifyColor({hue, saturation, lightness, alpha: 1}, stop),
+      );
+
+      return colorStyles;
+    },
+    {},
+  );
+}
+
+export function reduceTheme(theme: ComponentThemeProperties): CSSProperties {
+  return Object.entries(theme)
+    .reduce((childAccumulator, childCurrent) => {
+      const maybeChildCurrent = childCurrent[1] != null ? childCurrent[1] : [];
+      return [
+        ...childAccumulator,
+        ...Object.entries(maybeChildCurrent).reduce(
+          (propertyAccumulator, propertyCurrent) => {
+            if (typeof propertyCurrent[1] === 'string') {
+              return [
+                ...propertyAccumulator,
+                ...[
+                  {
+                    [`--${childCurrent[0]}-${propertyCurrent[0]}`]: `var(${propertyCurrent[1]})`,
+                  },
+                ],
+              ];
+            } else {
+              const maybePropertyCurrent =
+                propertyCurrent[1] != null ? propertyCurrent[1] : [];
+              return [
+                ...propertyAccumulator,
+                ...[
+                  ...maybePropertyCurrent.map((property, index) => {
+                    return {
+                      [`--${childCurrent[0]}-${propertyCurrent[0]}-${index +
+                        1}`]: `var(${property})`,
+                    };
+                  }),
+                ],
+              ];
+            }
+          },
+          [],
+        ),
+      ];
+    }, [])
+    .reduce((accumulator, current) => {
+      return {...accumulator, ...current};
+    }, {});
 }

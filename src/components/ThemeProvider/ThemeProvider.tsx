@@ -1,12 +1,12 @@
 import React from 'react';
 import isEqual from 'lodash/isEqual';
 import {ThemeContext} from '../../utilities/theme';
-import {Theme} from '../../utilities/theme/types';
+import {Theme, CSSProperties} from '../../utilities/theme/types';
 import {setColors} from '../../utilities/theme/utils';
 
 interface State {
   theme: Theme;
-  colors: string[][] | undefined;
+  colors: CSSProperties | undefined;
 }
 
 interface ThemeProviderProps {
@@ -15,12 +15,6 @@ interface ThemeProviderProps {
   /** The content to display */
   children?: React.ReactNode;
 }
-
-const defaultTheme = {
-  '--top-bar-background': '#00848e',
-  '--top-bar-color': '#f9fafb',
-  '--top-bar-background-lighter': '#1d9ba4',
-};
 
 export class ThemeProvider extends React.Component<ThemeProviderProps, State> {
   state: State = {
@@ -45,8 +39,10 @@ export class ThemeProvider extends React.Component<ThemeProviderProps, State> {
     const {
       theme: {logo = null, ...rest},
     } = this.state;
-    const {children} = this.props;
-    const styles = this.createStyles() || defaultTheme;
+    const {
+      props: {children},
+      state: {colors},
+    } = this;
 
     const theme = {
       ...rest,
@@ -55,16 +51,9 @@ export class ThemeProvider extends React.Component<ThemeProviderProps, State> {
 
     return (
       <ThemeContext.Provider value={theme}>
-        <div style={styles}>{children}</div>
+        <div style={colors}>{children}</div>
       </ThemeContext.Provider>
     );
-  }
-
-  createStyles() {
-    const {colors} = this.state;
-    return colors
-      ? colors.reduce((state, [key, value]) => ({...state, [key]: value}), {})
-      : null;
   }
 }
 
