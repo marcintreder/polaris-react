@@ -16,14 +16,16 @@ export type CSSProperties = {
 };
 
 export type ThemeColors = {
+  // topBar?:
   surface?: string;
-  brand?: string;
-  interaction?: string;
-  timeliness?: string;
-  positive?: string;
-  attention?: string;
+  onSurface?: string;
+  interactiveNeutral?: string;
+  interactive?: string;
+  branded?: string;
+  critical?: string;
   warning?: string;
-  negative?: string;
+  highlight?: string;
+  success?: string;
 };
 
 export interface Theme {
