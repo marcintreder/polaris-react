@@ -180,20 +180,20 @@ function successColors(success) {
 // TODO: Type name here is weird, we should either really type this so only camelCase key names are valid in the argument
 // or use a more generic name for this type
 function customPropertiesTransformer(colors: CSSProperties): CSSProperties {
-  const transformedColors: CSSProperties = {};
-
-  Object.keys(colors).map((key) => {
-    transformedColors[toCssCustomPropertySyntax(key)] = colors[key];
-  });
-
-  return transformedColors;
+  return Object.entries(colors).reduce(
+    (state, [key, value]) => ({
+      ...state,
+      [toCssCustomPropertySyntax(key)]: value,
+    }),
+    {},
+  );
 }
 
 function toCssCustomPropertySyntax(camelCase: string) {
   return `--${camelCase.replace(/([A-Z0-9])/g, '-$1').toLowerCase()}`;
 }
 
-const allColors: any = {
+const allColors = {
   'Surface/Background': '#FAFAFA',
   'Surface/Foreground': '#FFFFFF',
   'Surface/ForegroundMuted': '#E6E6E6',
@@ -284,10 +284,9 @@ const allColors: any = {
   'Success/SurfaceMuted': '#F8FCFB',
 };
 
-const allColorsHsl: any = {};
-
-Object.keys(allColors).map((key) => {
-  allColorsHsl[key] = colorToHsla(allColors[key]);
-});
-
-console.log(allColorsHsl);
+console.log(
+  Object.entries(allColors).reduce(
+    (state, [key, value]) => ({...state, [key]: colorToHsla(value)}),
+    {},
+  ),
+);
