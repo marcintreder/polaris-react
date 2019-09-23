@@ -1,9 +1,9 @@
-import {setColors} from '../utils';
+import {colors} from '../utils';
 
-describe('setColors', () => {
+describe('colors', () => {
   it('returns an object of css custom properties', () => {
-    const theme = {colors: {brand: '#eeeeee'}};
-    const colorScheme = setColors(theme);
+    const theme = {colors: {branded: '#eeeeee'}};
+    const colorScheme = colors(theme);
     expect(colorScheme).toStrictEqual({});
   });
 });
