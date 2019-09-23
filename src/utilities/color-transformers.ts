@@ -7,6 +7,7 @@ import {
   HSLColor,
   HSLAColor,
   HSBLAColor,
+  MaybeAlphaHSLAColor,
 } from './color-types';
 import {compose} from './compose';
 
@@ -198,7 +199,7 @@ export function rgbToHsl(color: RGBAColor): HSLAColor {
   return {hue, saturation, lightness, alpha};
 }
 
-export function hexToRgb(color: string) {
+function hexToRgb(color: string) {
   if (color.length === 4) {
     const repeatHex = (hex1: number, hex2: number) =>
       color.slice(hex1, hex2).repeat(2);
@@ -245,7 +246,7 @@ function getColorType(color: string): ColorType {
   }
 }
 
-export function hslToString(hslColor: HSLAColor | string) {
+export function hslToString(hslColor: MaybeAlphaHSLAColor | string) {
   if (typeof hslColor === 'string') {
     return hslColor;
   }

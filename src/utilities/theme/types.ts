@@ -36,24 +36,3 @@ export interface Theme {
 }
 
 export type ThemeVariant = 'light' | 'dark';
-
-type StateProperties = 'default' | 'hover' | 'focus' | 'active' | 'disabled';
-type StyleProperties =
-  | 'text'
-  | 'textOnDark'
-  | 'textOnLight'
-  | 'textSubdued'
-  | 'textSubduedOnDark'
-  | 'textSubduedOnLight'
-  | 'icon'
-  | 'iconOnDark'
-  | 'iconOnLight'
-  | 'background'
-  | 'backgroundSubdued'
-  | 'border'
-  | 'gradient'
-  | 'shadow';
-
-export type ComponentThemeProperties = {
-  [Theme in StateProperties]?: {[Style in StyleProperties]?: string | string[]};
-};

@@ -36,3 +36,7 @@ export interface HSLAColor extends HSLColor {
   /** Level of transparency */
   alpha: number;
 }
+
+export interface MaybeAlphaHSLAColor extends Omit<HSLAColor, 'alpha'> {
+  alpha?: number;
+}

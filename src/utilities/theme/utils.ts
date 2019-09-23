@@ -1,7 +1,6 @@
 import {HSLColor, HSLAColor} from '../color-types';
 import {colorToHsla, hslToString, hslToRgb} from '../color-transformers';
 import {isLight} from '../color-validation';
-
 import {CSSProperties, Theme} from './types';
 
 // TODO: Pull from polaris-tokens
@@ -17,13 +16,165 @@ const defaultRoleValues = {
   success: '#008060',
 };
 
-// TODO: alpha should be optional to all HSL related calls and default to 1
-const alpha = 1.0;
+export function colors(theme: Theme) {
+  const {colors = {}} = theme;
 
-// TODO: Refactor to just use this function, no need for a class
-// TODO: Rename to Colors and will be top level factory, could also call it Palette
-export function setColors(theme: Theme) {
-  return customPropertiesTransformer(new ColorFactory(theme).colors);
+  const isLightTheme = isLight(
+    hslToRgb(colorToHsla(
+      colors == null || colors.surface == null
+        ? defaultRoleValues.surface
+        : colors.surface,
+    ) as HSLColor),
+  );
+
+  const {
+    surface = defaultRoleValues.surface,
+    onSurface = defaultRoleValues.onSurface,
+    interactive = defaultRoleValues.interactive,
+    interactiveNeutral = defaultRoleValues.interactiveNeutral,
+    branded = defaultRoleValues.branded,
+    critical = defaultRoleValues.critical,
+    warning = defaultRoleValues.warning,
+    highlight = defaultRoleValues.highlight,
+    success = defaultRoleValues.success,
+  } = colors;
+
+  return customPropertiesTransformer({
+    ...surfaceColors(surface, isLightTheme),
+    ...onSurfaceColors(onSurface, isLightTheme),
+    ...interactiveColors(interactive),
+    ...interactiveNeutralColors(interactiveNeutral),
+    ...brandedColors(branded),
+    ...criticalColors(critical),
+    ...warningColors(warning),
+    ...highlightColors(highlight),
+    ...successColors(success),
+  });
+}
+
+function surfaceColors(
+  baseColor: string,
+  isLightTheme: boolean,
+): CSSProperties {
+  const hslBaseColor = colorToHsla(baseColor) as HSLColor;
+  const {hue, saturation} = hslBaseColor;
+
+  return {
+    surfaceBackground: hslToString({
+      hue,
+      saturation,
+      lightness: isLightTheme ? 98 : 2,
+    }),
+    surfaceForeground: hslToString({
+      hue,
+      saturation,
+      lightness: isLightTheme ? 100 : 0,
+    }),
+    surfaceForegroundSubdued: hslToString({
+      hue,
+      saturation,
+      lightness: isLightTheme ? 90 : 10,
+    }),
+    surfaceOpposite: hslToString({
+      hue,
+      saturation,
+      lightness: isLightTheme ? 0 : 100,
+    }),
+  };
+}
+
+function onSurfaceColors(
+  baseColor: string,
+  isLightTheme: boolean,
+): CSSProperties {
+  const hslBaseColor = colorToHsla(baseColor) as HSLColor;
+  const {hue, saturation} = hslBaseColor;
+
+  return {
+    iconOnSurface: hslToString({
+      hue,
+      saturation,
+      lightness: isLightTheme ? 98 : 2,
+    }),
+    iconDisabledOnSurface: hslToString({
+      hue,
+      saturation,
+      lightness: isLightTheme ? 98 : 2,
+    }),
+  };
+}
+
+function interactiveColors(baseColor: string): CSSProperties {
+  const hslBaseColor = colorToHsla(baseColor) as HSLAColor;
+  const {hue, saturation, lightness} = hslBaseColor;
+
+  return {
+    interactiveAction: hslToString(hslBaseColor),
+    interactiveActionDisabled: hslToString({
+      hue,
+      saturation,
+      lightness: lightness + 14,
+    }),
+    interactiveActionHovered: hslToString({
+      hue,
+      saturation: saturation + 7,
+      lightness: lightness - 7,
+    }),
+    interactiveActionMuted: hslToString({
+      hue,
+      saturation,
+      lightness: lightness + 7,
+    }),
+    interactiveActionPressed: hslToString({
+      hue,
+      saturation: saturation + 7,
+      lightness: lightness - 13,
+    }),
+    interactiveFocus: hslToString({
+      hue,
+      saturation: saturation + 7,
+      lightness: lightness + 14,
+    }),
+    interactiveSelected: hslToString({
+      hue,
+      saturation: saturation + 7,
+      lightness: lightness + 52,
+    }),
+    interactiveSelectedHovered: hslToString({
+      hue,
+      saturation: saturation - 30,
+      lightness: lightness + 45,
+    }),
+    interactiveSelectedPressed: hslToString({
+      hue,
+      saturation: saturation - 30,
+      lightness: lightness + 38,
+    }),
+  };
+}
+
+function interactiveNeutralColors(interactiveNeutral) {
+  return {};
+}
+
+function brandedColors(branded) {
+  return {};
+}
+
+function criticalColors(critical) {
+  return {};
+}
+
+function warningColors(warning) {
+  return {};
+}
+
+function highlightColors(highlight) {
+  return {};
+}
+
+function successColors(success) {
+  return {};
 }
 
 // TODO: Type name here is weird, we should either really type this so only camelCase key names are valid in the argument
@@ -40,184 +191,6 @@ function customPropertiesTransformer(colors: CSSProperties): CSSProperties {
 
 function toCssCustomPropertySyntax(camelCase: string) {
   return `--${camelCase.replace(/([A-Z0-9])/g, '-$1').toLowerCase()}`;
-}
-
-class ColorFactory {
-  colors: CSSProperties = {};
-
-  private isLightTheme: boolean;
-
-  constructor(theme: Theme) {
-    const {colors} = theme;
-    const surface =
-      colors == null || colors.surface == null
-        ? defaultRoleValues.surface
-        : colors.surface;
-
-    this.setColors(theme);
-    this.isLightTheme = isLight(hslToRgb(colorToHsla(surface) as HSLColor));
-  }
-
-  private setColors(theme: Theme): void {
-    const {colors = {}} = theme;
-    const {
-      surface = defaultRoleValues.surface,
-      onSurface = defaultRoleValues.onSurface,
-      interactive = defaultRoleValues.interactive,
-      interactiveNeutral = defaultRoleValues.interactiveNeutral,
-      branded = defaultRoleValues.branded,
-      critical = defaultRoleValues.critical,
-      warning = defaultRoleValues.warning,
-      highlight = defaultRoleValues.highlight,
-      success = defaultRoleValues.success,
-    } = colors;
-
-    this.colors = {
-      ...this.surfaceColors(surface),
-      ...this.onSurfaceColors(onSurface),
-      ...this.interactiveColors(interactive),
-      ...this.interactiveNeutralColors(interactiveNeutral),
-      ...this.brandedColors(branded),
-      ...this.criticalColors(critical),
-      ...this.warningColors(warning),
-      ...this.highlightColors(highlight),
-      ...this.successColors(success),
-    };
-  }
-
-  private surfaceColors(baseColor: string): CSSProperties {
-    const {isLightTheme} = this;
-    const hslBaseColor = colorToHsla(baseColor) as HSLColor;
-    const colorRole = 'surface';
-
-    return {
-      [`${colorRole}Background`]: hslToString({
-        hue: hslBaseColor.hue,
-        saturation: hslBaseColor.saturation,
-        lightness: isLightTheme ? 98 : 2,
-        alpha,
-      }),
-      [`${colorRole}Foreground`]: hslToString({
-        hue: hslBaseColor.hue,
-        saturation: hslBaseColor.saturation,
-        lightness: isLightTheme ? 100 : 0,
-        alpha,
-      }),
-      [`${colorRole}ForegroundSubdued`]: hslToString({
-        hue: hslBaseColor.hue,
-        saturation: hslBaseColor.saturation,
-        lightness: isLightTheme ? 90 : 10,
-        alpha,
-      }),
-      [`${colorRole}Opposite`]: hslToString({
-        hue: hslBaseColor.hue,
-        saturation: hslBaseColor.saturation,
-        lightness: isLightTheme ? 0 : 100,
-        alpha,
-      }),
-    };
-  }
-
-  private onSurfaceColors(baseColor: string): CSSProperties {
-    const {isLightTheme} = this;
-    const hslBaseColor = colorToHsla(baseColor) as HSLColor;
-
-    return {
-      [`iconOnSurface`]: hslToString({
-        hue: hslBaseColor.hue,
-        saturation: hslBaseColor.saturation,
-        lightness: isLightTheme ? 98 : 2,
-        alpha,
-      }),
-      [`iconDisabledOnSurface`]: hslToString({
-        hue: hslBaseColor.hue,
-        saturation: hslBaseColor.saturation,
-        lightness: isLightTheme ? 98 : 2,
-        alpha,
-      }),
-    };
-  }
-
-  private interactiveColors(baseColor: string): CSSProperties {
-    const hslBaseColor = colorToHsla(baseColor) as HSLAColor;
-    const {hue, saturation, lightness} = hslBaseColor;
-
-    return {
-      interactiveAction: hslToString(hslBaseColor),
-      interactiveActionDisabled: hslToString({
-        hue,
-        saturation,
-        lightness: lightness + 14,
-        alpha,
-      }),
-      interactiveActionHovered: hslToString({
-        hue,
-        saturation: saturation + 7,
-        lightness: lightness - 7,
-        alpha,
-      }),
-      interactiveActionMuted: hslToString({
-        hue,
-        saturation,
-        lightness: lightness + 7,
-        alpha,
-      }),
-      interactiveActionPressed: hslToString({
-        hue,
-        saturation: saturation + 7,
-        lightness: lightness - 13,
-        alpha,
-      }),
-      interactiveFocus: hslToString({
-        hue,
-        saturation: saturation + 7,
-        lightness: lightness + 14,
-        alpha,
-      }),
-      interactiveSelected: hslToString({
-        hue,
-        saturation: saturation + 7,
-        lightness: lightness + 52,
-        alpha,
-      }),
-      interactiveSelectedHovered: hslToString({
-        hue,
-        saturation: saturation - 30,
-        lightness: lightness + 45,
-        alpha,
-      }),
-      interactiveSelectedPressed: hslToString({
-        hue,
-        saturation: saturation - 30,
-        lightness: lightness + 38,
-        alpha,
-      }),
-    };
-  }
-
-  private interactiveNeutralColors(interactiveNeutral) {
-    return {};
-  }
-
-  private brandedColors(branded) {
-    return {};
-  }
-
-  private criticalColors(critical) {
-    return {};
-  }
-
-  private warningColors(warning) {
-    return {};
-  }
-
-  private highlightColors(highlight) {
-    return {};
-  }
-
-  private successColors(success) {
-    return {};
-  }
 }
 
 const allColors: any = {

@@ -2,7 +2,7 @@ import React from 'react';
 import isEqual from 'lodash/isEqual';
 import {ThemeContext} from '../../utilities/theme';
 import {Theme, CSSProperties} from '../../utilities/theme/types';
-import {setColors} from '../../utilities/theme/utils';
+import {colors} from '../../utilities/theme/utils';
 
 interface State {
   theme: Theme;
@@ -19,7 +19,7 @@ interface ThemeProviderProps {
 export class ThemeProvider extends React.Component<ThemeProviderProps, State> {
   state: State = {
     theme: setThemeContext(this.props.theme),
-    colors: setColors(this.props.theme),
+    colors: colors(this.props.theme),
   };
 
   componentDidUpdate({theme: prevTheme}: ThemeProviderProps) {
@@ -31,7 +31,7 @@ export class ThemeProvider extends React.Component<ThemeProviderProps, State> {
     // eslint-disable-next-line react/no-did-update-set-state
     this.setState({
       theme: setThemeContext(theme),
-      colors: setColors(theme),
+      colors: colors(theme),
     });
   }
 
