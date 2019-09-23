@@ -16,7 +16,7 @@ const defaultRoleValues = {
   success: '#008060',
 };
 
-export function colors(theme: Theme) {
+export function Colors(theme: Theme) {
   const {colors = {}} = theme;
 
   const isLightTheme = isLight(
@@ -31,7 +31,6 @@ export function colors(theme: Theme) {
     surface = defaultRoleValues.surface,
     onSurface = defaultRoleValues.onSurface,
     interactive = defaultRoleValues.interactive,
-    interactiveNeutral = defaultRoleValues.interactiveNeutral,
     branded = defaultRoleValues.branded,
     critical = defaultRoleValues.critical,
     warning = defaultRoleValues.warning,
@@ -40,141 +39,238 @@ export function colors(theme: Theme) {
   } = colors;
 
   return customPropertiesTransformer({
-    ...surfaceColors(surface, isLightTheme),
-    ...onSurfaceColors(onSurface, isLightTheme),
+    ...surfaceColors(surface),
+    ...onSurfaceColors(onSurface),
     ...interactiveColors(interactive),
-    ...interactiveNeutralColors(interactiveNeutral),
+    ...interactiveNeutralColors(onSurface),
     ...brandedColors(branded),
     ...criticalColors(critical),
     ...warningColors(warning),
     ...highlightColors(highlight),
     ...successColors(success),
   });
-}
 
-function surfaceColors(
-  baseColor: string,
-  isLightTheme: boolean,
-): CSSProperties {
-  const hslBaseColor = colorToHsla(baseColor) as HSLColor;
-  const {hue, saturation} = hslBaseColor;
+  function surfaceColors(baseColor: string): CSSProperties {
+    const hslBaseColor = colorToHsla(baseColor) as HSLColor;
+    const {hue, saturation} = hslBaseColor;
 
-  return {
-    surfaceBackground: hslToString({
-      hue,
-      saturation,
-      lightness: isLightTheme ? 98 : 2,
-    }),
-    surfaceForeground: hslToString({
-      hue,
-      saturation,
-      lightness: isLightTheme ? 100 : 0,
-    }),
-    surfaceForegroundSubdued: hslToString({
-      hue,
-      saturation,
-      lightness: isLightTheme ? 90 : 10,
-    }),
-    surfaceOpposite: hslToString({
-      hue,
-      saturation,
-      lightness: isLightTheme ? 0 : 100,
-    }),
-  };
-}
+    return {
+      surface: hslToString(hslBaseColor),
+      surfaceBackground: hslToString({
+        hue,
+        saturation,
+        // TODO: Should the dark version be 0 lightness to save battery?
+        lightness: isLightTheme ? 98 : 7,
+      }),
+      surfaceForeground: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 100 : 13,
+      }),
+      surfaceForegroundSubdued: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 90 : 10,
+      }),
+      surfaceOpposite: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 0 : 100,
+      }),
+    };
+  }
 
-function onSurfaceColors(
-  baseColor: string,
-  isLightTheme: boolean,
-): CSSProperties {
-  const hslBaseColor = colorToHsla(baseColor) as HSLColor;
-  const {hue, saturation} = hslBaseColor;
+  function onSurfaceColors(baseColor: string): CSSProperties {
+    const hslBaseColor = colorToHsla(baseColor) as HSLColor;
+    const {hue, saturation} = hslBaseColor;
 
-  return {
-    iconOnSurface: hslToString({
-      hue,
-      saturation,
-      lightness: isLightTheme ? 98 : 2,
-    }),
-    iconDisabledOnSurface: hslToString({
-      hue,
-      saturation,
-      lightness: isLightTheme ? 98 : 2,
-    }),
-  };
-}
+    return {
+      onSurface: hslToString(hslBaseColor),
+      iconOnSurface: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 98 : 2,
+      }),
+      iconDisabledOnSurface: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 98 : 2,
+      }),
+    };
+  }
 
-function interactiveColors(baseColor: string): CSSProperties {
-  const hslBaseColor = colorToHsla(baseColor) as HSLAColor;
-  const {hue, saturation, lightness} = hslBaseColor;
+  function interactiveColors(baseColor: string): CSSProperties {
+    const hslBaseColor = colorToHsla(baseColor) as HSLAColor;
+    const {hue, saturation} = hslBaseColor;
 
-  return {
-    interactiveAction: hslToString(hslBaseColor),
-    interactiveActionDisabled: hslToString({
-      hue,
-      saturation,
-      lightness: lightness + 14,
-    }),
-    interactiveActionHovered: hslToString({
-      hue,
-      saturation: saturation + 7,
-      lightness: lightness - 7,
-    }),
-    interactiveActionMuted: hslToString({
-      hue,
-      saturation,
-      lightness: lightness + 7,
-    }),
-    interactiveActionPressed: hslToString({
-      hue,
-      saturation: saturation + 7,
-      lightness: lightness - 13,
-    }),
-    interactiveFocus: hslToString({
-      hue,
-      saturation: saturation + 7,
-      lightness: lightness + 14,
-    }),
-    interactiveSelected: hslToString({
-      hue,
-      saturation: saturation + 7,
-      lightness: lightness + 52,
-    }),
-    interactiveSelectedHovered: hslToString({
-      hue,
-      saturation: saturation - 30,
-      lightness: lightness + 45,
-    }),
-    interactiveSelectedPressed: hslToString({
-      hue,
-      saturation: saturation - 30,
-      lightness: lightness + 38,
-    }),
-  };
-}
+    return {
+      interactive: hslToString(hslBaseColor),
+      interactiveAction: hslToString({
+        hue,
+        saturation,
+        lightness: 44,
+      }),
+      interactiveActionDisabled: hslToString({
+        hue,
+        saturation,
+        lightness: 58,
+      }),
+      interactiveActionHovered: hslToString({
+        hue,
+        // was +7 saturation
+        saturation,
+        lightness: 37,
+      }),
+      interactiveActionMuted: hslToString({
+        hue,
+        saturation,
+        lightness: 51,
+      }),
+      interactiveActionPressed: hslToString({
+        hue,
+        // was +7 saturation
+        saturation,
+        lightness: 31,
+      }),
+      interactiveFocus: hslToString({
+        hue,
+        saturation: saturation + 7,
+        lightness: 58,
+      }),
+      interactiveSelected: hslToString({
+        hue,
+        // was +7 saturation
+        saturation,
+        lightness: 96,
+      }),
+      interactiveSelectedHovered: hslToString({
+        hue,
+        // was -30 saturation
+        saturation,
+        lightness: 89,
+      }),
+      interactiveSelectedPressed: hslToString({
+        hue,
+        // was -30 saturation
+        saturation,
+        lightness: 82,
+      }),
+    };
+  }
 
-function interactiveNeutralColors(interactiveNeutral) {
-  return {};
-}
+  function interactiveNeutralColors(baseColor: string) {
+    const hslBaseColor = colorToHsla(baseColor) as HSLAColor;
+    const {hue, saturation} = hslBaseColor;
 
-function brandedColors(branded) {
-  return {};
-}
+    return {
+      interactive: hslToString(hslBaseColor),
+      interactiveNeutralElevation0: hslToString({
+        hue,
+        saturation,
+        // TODO: Should the dark version be 0 lightness to save battery?
+        lightness: isLightTheme ? 100 : 7,
+      }),
+      interactiveNeutralElevation1: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 94 : 13,
+      }),
+      interactiveNeutralElevation2: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 92 : 22,
+      }),
+      interactiveNeutralElevation3: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 86 : 29,
+      }),
+      interactiveNeutralElevation4: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 76 : 39,
+      }),
+      interactiveNeutralElevation5: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 66 : 49,
+      }),
+    };
+  }
 
-function criticalColors(critical) {
-  return {};
-}
+  function brandedColors(branded) {
+    return {};
+  }
 
-function warningColors(warning) {
-  return {};
-}
+  function criticalColors(critical) {
+    // Critical/Divider: {hue: 0, saturation: 77, lightness: 52, alpha: 1}
+    // Critical/Icon: {hue: 0, saturation: 77, lightness: 52, alpha: 1}
+    // Critical/Surface: {hue: 0, saturation: 84, lightness: 88, alpha: 1}
+    // Critical/SurfaceMuted: {hue: 0, saturation: 80, lightness: 98, alpha: 1}
+    // Critical/Text: {hue: 0, saturation: 59, lightness: 30, alpha: 1}
 
-function highlightColors(highlight) {
-  return {};
-}
+    return {};
+  }
 
-function successColors(success) {
-  return {};
+  function warningColors(warning) {
+    // Warning/Divider: {hue: 39, saturation: 100, lightness: 66, alpha: 1}
+    // Warning/Icon: {hue: 39, saturation: 100, lightness: 66, alpha: 1}
+    // Warning/Surface: {hue: 40, saturation: 100, lightness: 88, alpha: 1}
+    // Warning/SurfaceMuted: {hue: 40, saturation: 100, lightness: 98, alpha: 1}
+    // Warning/Text: {hue: 39, saturation: 100, lightness: 30, alpha: 1}
+
+    return {};
+  }
+
+  function highlightColors(baseColor: string) {
+    const hslBaseColor = colorToHsla(baseColor) as HSLAColor;
+    const {hue, saturation} = hslBaseColor;
+
+    // Highlight/Divider: {hue: 173, saturation: 56.00000000000001, lightness: 57.99999999999999, alpha: 1}
+    // Highlight/Icon: {hue: 173, saturation: 56.00000000000001, lightness: 57.99999999999999, alpha: 1}
+    // Highlight/Surface: {hue: 170, saturation: 61, lightness: 88, alpha: 1}
+    // Highlight/SurfaceMuted: {hue: 170, saturation: 60, lightness: 98, alpha: 1}
+    // Highlight/Text: {hue: 173, saturation: 56.00000000000001, lightness: 30, alpha: 1}
+
+    return {
+      highlight: hslToString(hslBaseColor),
+      highlightDivider: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 60 : 40,
+      }),
+      highlightIcon: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 60 : 40,
+      }),
+      highlightSurface: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 88 : 12,
+      }),
+      highlightSurfaceMuted: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 98 : 2,
+      }),
+      highlightText: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 98 : 2,
+      }),
+    };
+  }
+
+  function successColors(success) {
+    // Success/Divider: {hue: 165, saturation: 100, lightness: 25, alpha: 1}
+    // Success/Icon: {hue: 165, saturation: 100, lightness: 25, alpha: 1}
+    // Success/Surface: {hue: 162, saturation: 38, lightness: 88, alpha: 1}
+    // Success/SurfaceMuted: {hue: 165, saturation: 40, lightness: 98, alpha: 1}
+    // Success/Text: {hue: 164, saturation: 100, lightness: 15, alpha: 1}
+
+    return {};
+  }
 }
 
 // TODO: Type name here is weird, we should either really type this so only camelCase key names are valid in the argument
@@ -282,6 +378,11 @@ const allColors = {
   'Success/Text': '#004D39',
   'Success/Divider': '#008060',
   'Success/SurfaceMuted': '#F8FCFB',
+  'Dark/Elevation00': '#111213',
+  'Dark/Elevation01': '#1F2225',
+  'Dark/Elevation02': '#35383B',
+  'Dark/Elevation03': '#484A4D',
+  'Dark/Elevation04': '#606367',
 };
 
 console.log(

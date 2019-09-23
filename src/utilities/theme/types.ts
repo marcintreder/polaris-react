@@ -19,7 +19,6 @@ export type ThemeColors = {
   // topBar?:
   surface?: string;
   onSurface?: string;
-  interactiveNeutral?: string;
   interactive?: string;
   branded?: string;
   critical?: string;
