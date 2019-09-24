@@ -4,17 +4,17 @@ import {isLight} from '../color-validation';
 import {CSSProperties, Theme} from './types';
 
 // TODO: Pull from polaris-tokens
-const defaultRoleValues = {
-  surface: '#FAFAFA',
-  onSurface: '#202024',
-  interactiveNeutral: '#EAEAEB',
-  interactive: '#0870D9',
-  branded: '#008060',
-  critical: '#E32727',
-  warning: '#FFC453',
-  highlight: '#59D0C2',
-  success: '#008060',
-};
+enum DefaultColor {
+  Surface = '#FAFAFA',
+  OnSurface = '#1F2225',
+  InteractiveNeutral = '#EAEAEB',
+  Interactive = '#0870D9',
+  Branded = '#008060',
+  Critical = '#E32727',
+  Warning = '#FFC453',
+  Highlight = '#59D0C2',
+  Success = '#008060',
+}
 
 export function Colors(theme: Theme) {
   const {colors = {}} = theme;
@@ -22,20 +22,20 @@ export function Colors(theme: Theme) {
   const isLightTheme = isLight(
     hslToRgb(colorToHsla(
       colors == null || colors.surface == null
-        ? defaultRoleValues.surface
+        ? DefaultColor.Surface
         : colors.surface,
     ) as HSLColor),
   );
 
   const {
-    surface = defaultRoleValues.surface,
-    onSurface = defaultRoleValues.onSurface,
-    interactive = defaultRoleValues.interactive,
-    branded = defaultRoleValues.branded,
-    critical = defaultRoleValues.critical,
-    warning = defaultRoleValues.warning,
-    highlight = defaultRoleValues.highlight,
-    success = defaultRoleValues.success,
+    surface = DefaultColor.Surface,
+    onSurface = DefaultColor.OnSurface,
+    interactive = DefaultColor.Interactive,
+    branded = DefaultColor.Branded,
+    critical = DefaultColor.Critical,
+    warning = DefaultColor.Warning,
+    highlight = DefaultColor.Highlight,
+    success = DefaultColor.Success,
   } = colors;
 
   return customPropertiesTransformer({
@@ -86,15 +86,265 @@ export function Colors(theme: Theme) {
 
     return {
       onSurface: hslToString(hslBaseColor),
+      actionOnDark: hslToString({
+        hue,
+        saturation,
+        lightness: 76,
+      }),
+      actionOnLight: hslToString({
+        hue,
+        saturation,
+        lightness: 36,
+      }),
+      actionOnOpposite: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 76 : 36,
+      }),
+      actionOnSurface: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 36 : 76,
+      }),
+      actionDisabledOnDark: hslToString({
+        hue,
+        saturation,
+        lightness: 66,
+      }),
+      actionDisabledOnLight: hslToString({
+        hue,
+        saturation,
+        lightness: 46,
+      }),
+      actionDisabledOnOpposite: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 66 : 46,
+      }),
+      actionDisabledOnSurface: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 46 : 66,
+      }),
+      actionHoveredOnDark: hslToString({
+        hue,
+        saturation,
+        lightness: 86,
+      }),
+      actionHoveredOnLight: hslToString({
+        hue,
+        saturation,
+        lightness: 26,
+      }),
+      actionHoveredOnOpposite: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 86 : 26,
+      }),
+      actionHoveredOnSurface: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 26 : 86,
+      }),
+      actionPressedOnDark: hslToString({
+        hue,
+        saturation,
+        lightness: 96,
+      }),
+      actionPressedOnLight: hslToString({
+        hue,
+        saturation,
+        lightness: 16,
+      }),
+      actionPressedOnOpposite: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 96 : 16,
+      }),
+      actionPressedOnSurface: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 16 : 96,
+      }),
+      dividerOnDark: hslToString({
+        hue,
+        saturation,
+        lightness: 80,
+      }),
+      dividerOnLight: hslToString({
+        hue,
+        saturation,
+        lightness: 75,
+      }),
+      dividerOnOpposite: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 80 : 75,
+      }),
+      dividerOnSurface: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 75 : 80,
+      }),
+      dividerDisabledOnDark: hslToString({
+        hue,
+        saturation,
+        lightness: 70,
+      }),
+      dividerDisabledOnLight: hslToString({
+        hue,
+        saturation,
+        lightness: 95,
+      }),
+      dividerDisabledOnOpposite: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 70 : 95,
+      }),
+      dividerDisabledOnSurface: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 95 : 70,
+      }),
+      dividerMutedOnDark: hslToString({
+        hue,
+        saturation,
+        lightness: 75,
+      }),
+      dividerMutedOnLight: hslToString({
+        hue,
+        saturation,
+        lightness: 85,
+      }),
+      dividerMutedOnOpposite: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 75 : 85,
+      }),
+      dividerMutedOnSurface: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 85 : 75,
+      }),
+      iconOnDark: hslToString({
+        hue,
+        saturation,
+        lightness: 98,
+      }),
+      iconOnLight: hslToString({
+        hue,
+        saturation,
+        lightness: 18,
+      }),
+      iconOnOpposite: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 98 : 18,
+      }),
       iconOnSurface: hslToString({
         hue,
         saturation,
-        lightness: isLightTheme ? 98 : 2,
+        lightness: isLightTheme ? 18 : 98,
+      }),
+      iconDisabledOnDark: hslToString({
+        hue,
+        saturation,
+        lightness: 75,
+      }),
+      iconDisabledOnLight: hslToString({
+        hue,
+        saturation,
+        lightness: 68,
+      }),
+      iconDisabledOnOpposite: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 75 : 68,
       }),
       iconDisabledOnSurface: hslToString({
         hue,
         saturation,
-        lightness: isLightTheme ? 98 : 2,
+        lightness: isLightTheme ? 68 : 75,
+      }),
+      iconMutedOnDark: hslToString({
+        hue,
+        saturation,
+        lightness: 88,
+      }),
+      iconMutedOnLight: hslToString({
+        hue,
+        saturation,
+        lightness: 43,
+      }),
+      iconMutedOnOpposite: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 88 : 43,
+      }),
+      iconMutedOnSurface: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 43 : 88,
+      }),
+      textOnDark: hslToString({
+        hue,
+        saturation,
+        lightness: 100,
+      }),
+      textOnLight: hslToString({
+        hue,
+        saturation,
+        lightness: 13,
+      }),
+      textOnOpposite: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 100 : 13,
+      }),
+      textOnSurface: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 13 : 100,
+      }),
+      textDisabledOnDark: hslToString({
+        hue,
+        saturation,
+        lightness: 80,
+      }),
+      textDisabledOnLight: hslToString({
+        hue,
+        saturation,
+        lightness: 63,
+      }),
+      textDisabledOnOpposite: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 80 : 63,
+      }),
+      textDisabledOnSurface: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 63 : 80,
+      }),
+      textMutedOnDark: hslToString({
+        hue,
+        saturation,
+        lightness: 90,
+      }),
+      textMutedOnLight: hslToString({
+        hue,
+        saturation,
+        lightness: 38,
+      }),
+      textMutedOnOpposite: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 90 : 38,
+      }),
+      textMutedOnSurface: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 38 : 90,
       }),
     };
   }
@@ -108,52 +358,47 @@ export function Colors(theme: Theme) {
       interactiveAction: hslToString({
         hue,
         saturation,
-        lightness: 44,
+        lightness: isLightTheme ? 44 : 56,
       }),
       interactiveActionDisabled: hslToString({
         hue,
         saturation,
-        lightness: 58,
+        lightness: isLightTheme ? 58 : 42,
       }),
       interactiveActionHovered: hslToString({
         hue,
-        // was +7 saturation
         saturation,
-        lightness: 37,
+        lightness: isLightTheme ? 37 : 63,
       }),
       interactiveActionMuted: hslToString({
         hue,
         saturation,
-        lightness: 51,
+        lightness: isLightTheme ? 51 : 49,
       }),
       interactiveActionPressed: hslToString({
         hue,
-        // was +7 saturation
         saturation,
-        lightness: 31,
+        lightness: isLightTheme ? 31 : 69,
       }),
       interactiveFocus: hslToString({
         hue,
-        saturation: saturation + 7,
-        lightness: 58,
+        saturation,
+        lightness: isLightTheme ? 58 : 42,
       }),
       interactiveSelected: hslToString({
         hue,
-        // was +7 saturation
         saturation,
-        lightness: 96,
+        lightness: isLightTheme ? 96 : 4,
       }),
       interactiveSelectedHovered: hslToString({
         hue,
-        // was -30 saturation
         saturation,
-        lightness: 89,
+        lightness: isLightTheme ? 89 : 11,
       }),
       interactiveSelectedPressed: hslToString({
         hue,
-        // was -30 saturation
         saturation,
-        lightness: 82,
+        lightness: isLightTheme ? 82 : 18,
       }),
     };
   }
@@ -198,51 +443,156 @@ export function Colors(theme: Theme) {
     };
   }
 
-  function brandedColors(branded) {
-    return {};
+  function brandedColors(baseColor: string) {
+    const hslBaseColor = colorToHsla(baseColor) as HSLAColor;
+    const {hue, saturation} = hslBaseColor;
+
+    return {
+      branded: hslToString(hslBaseColor),
+      brandedAction: hslToString({
+        hue,
+        saturation,
+        lightness: 25,
+      }),
+      brandedActionDisabled: hslToString({
+        hue,
+        saturation,
+        lightness: 32,
+      }),
+      brandedActionHovered: hslToString({
+        hue,
+        saturation,
+        lightness: 22,
+      }),
+      brandedActionPressed: hslToString({
+        hue,
+        saturation,
+        lightness: 15,
+      }),
+      iconOnBranded: hslToString({
+        hue,
+        saturation,
+        lightness: 98,
+      }),
+      iconMutedOnBranded: hslToString({
+        hue,
+        saturation,
+        lightness: 88,
+      }),
+      textOnBranded: hslToString({
+        hue,
+        saturation,
+        lightness: 100,
+      }),
+      textMutedOnBranded: hslToString({
+        hue,
+        saturation,
+        lightness: 90,
+      }),
+
+      // TODO: Audit these branded selected colors.
+      // Only did variable lightness here as it is used for nav and tabs.
+      brandedSelected: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 95 : 5,
+      }),
+      brandedSelectedHovered: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 81 : 19,
+      }),
+      brandedSelectedPressed: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 74 : 26,
+      }),
+    };
   }
 
-  function criticalColors(critical) {
-    // Critical/Divider: {hue: 0, saturation: 77, lightness: 52, alpha: 1}
-    // Critical/Icon: {hue: 0, saturation: 77, lightness: 52, alpha: 1}
-    // Critical/Surface: {hue: 0, saturation: 84, lightness: 88, alpha: 1}
-    // Critical/SurfaceMuted: {hue: 0, saturation: 80, lightness: 98, alpha: 1}
-    // Critical/Text: {hue: 0, saturation: 59, lightness: 30, alpha: 1}
+  function criticalColors(baseColor: string) {
+    const hslBaseColor = colorToHsla(baseColor) as HSLAColor;
+    const {hue, saturation} = hslBaseColor;
 
-    return {};
+    return {
+      critical: hslToString(hslBaseColor),
+      criticalDivider: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 52 : 48,
+      }),
+      criticalIcon: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 52 : 48,
+      }),
+      criticalSurface: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 88 : 12,
+      }),
+      criticalSurfaceMuted: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 98 : 2,
+      }),
+      criticalText: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 30 : 70,
+      }),
+    };
   }
 
-  function warningColors(warning) {
-    // Warning/Divider: {hue: 39, saturation: 100, lightness: 66, alpha: 1}
-    // Warning/Icon: {hue: 39, saturation: 100, lightness: 66, alpha: 1}
-    // Warning/Surface: {hue: 40, saturation: 100, lightness: 88, alpha: 1}
-    // Warning/SurfaceMuted: {hue: 40, saturation: 100, lightness: 98, alpha: 1}
-    // Warning/Text: {hue: 39, saturation: 100, lightness: 30, alpha: 1}
+  function warningColors(baseColor: string) {
+    const hslBaseColor = colorToHsla(baseColor) as HSLAColor;
+    const {hue, saturation} = hslBaseColor;
 
-    return {};
+    return {
+      warning: hslToString(hslBaseColor),
+      warningDivider: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 66 : 34,
+      }),
+      warningIcon: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 66 : 34,
+      }),
+      warningSurface: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 88 : 12,
+      }),
+      warningSurfaceMuted: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 98 : 2,
+      }),
+      warningText: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 30 : 70,
+      }),
+    };
   }
 
   function highlightColors(baseColor: string) {
     const hslBaseColor = colorToHsla(baseColor) as HSLAColor;
     const {hue, saturation} = hslBaseColor;
 
-    // Highlight/Divider: {hue: 173, saturation: 56.00000000000001, lightness: 57.99999999999999, alpha: 1}
-    // Highlight/Icon: {hue: 173, saturation: 56.00000000000001, lightness: 57.99999999999999, alpha: 1}
-    // Highlight/Surface: {hue: 170, saturation: 61, lightness: 88, alpha: 1}
-    // Highlight/SurfaceMuted: {hue: 170, saturation: 60, lightness: 98, alpha: 1}
-    // Highlight/Text: {hue: 173, saturation: 56.00000000000001, lightness: 30, alpha: 1}
-
     return {
       highlight: hslToString(hslBaseColor),
       highlightDivider: hslToString({
         hue,
         saturation,
-        lightness: isLightTheme ? 60 : 40,
+        lightness: isLightTheme ? 58 : 42,
       }),
       highlightIcon: hslToString({
         hue,
         saturation,
-        lightness: isLightTheme ? 60 : 40,
+        lightness: isLightTheme ? 58 : 42,
       }),
       highlightSurface: hslToString({
         hue,
@@ -262,26 +612,53 @@ export function Colors(theme: Theme) {
     };
   }
 
-  function successColors(success) {
-    // Success/Divider: {hue: 165, saturation: 100, lightness: 25, alpha: 1}
-    // Success/Icon: {hue: 165, saturation: 100, lightness: 25, alpha: 1}
-    // Success/Surface: {hue: 162, saturation: 38, lightness: 88, alpha: 1}
-    // Success/SurfaceMuted: {hue: 165, saturation: 40, lightness: 98, alpha: 1}
-    // Success/Text: {hue: 164, saturation: 100, lightness: 15, alpha: 1}
+  function successColors(baseColor: string) {
+    const hslBaseColor = colorToHsla(baseColor) as HSLAColor;
+    const {hue, saturation} = hslBaseColor;
 
-    return {};
+    return {
+      success: hslToString(hslBaseColor),
+
+      // Pulled this 35 lightness value from a dark mode playground for an icon
+      criticalDivider: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 25 : 35,
+      }),
+
+      // Pulled this 35 lightness value from a dark mode playground for an icon
+      criticalIcon: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 25 : 35,
+      }),
+      criticalSurface: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 88 : 12,
+      }),
+      criticalSurfaceMuted: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 98 : 2,
+      }),
+      criticalText: hslToString({
+        hue,
+        saturation,
+        lightness: isLightTheme ? 15 : 85,
+      }),
+    };
   }
 }
 
 // TODO: Type name here is weird, we should either really type this so only camelCase key names are valid in the argument
 // or use a more generic name for this type
 function customPropertiesTransformer(colors: CSSProperties): CSSProperties {
-  return Object.entries(colors).reduce(
-    (state, [key, value]) => ({
-      ...state,
-      [toCssCustomPropertySyntax(key)]: value,
-    }),
+  return Object.assign(
     {},
+    ...Object.entries(colors).map(([key, value]) => ({
+      [toCssCustomPropertySyntax(key)]: value,
+    })),
   );
 }
 
@@ -289,13 +666,13 @@ function toCssCustomPropertySyntax(camelCase: string) {
   return `--${camelCase.replace(/([A-Z0-9])/g, '-$1').toLowerCase()}`;
 }
 
-const allColors = {
+const colorsFromFigma = {
   'Surface/Background': '#FAFAFA',
   'Surface/Foreground': '#FFFFFF',
   'Surface/ForegroundMuted': '#E6E6E6',
   'Surface/Foreground/Opposite': '#050505',
   'Icon/OnSurface': '#2B2B31',
-  'Text/OnSurface': '#1F1F25',
+  'Text/OnSurface': '#1F2225',
   'ActionDisabled/OnSurface': '#6B7580',
   'Action/OnSurface': '#545C64',
   'ActionHovered/OnSurface': '#3D4248',
@@ -385,9 +762,16 @@ const allColors = {
   'Dark/Elevation04': '#606367',
 };
 
-console.log(
-  Object.entries(allColors).reduce(
-    (state, [key, value]) => ({...state, [key]: colorToHsla(value)}),
-    {},
-  ),
-);
+log(colorsFromFigma);
+
+function log(colors: CSSProperties) {
+  console.log(
+    'Colors from Figma as HSLA:',
+    Object.assign(
+      {},
+      ...Object.entries(colors).map(([key, value]) => ({
+        [key]: colorToHsla(value),
+      })),
+    ),
+  );
+}
