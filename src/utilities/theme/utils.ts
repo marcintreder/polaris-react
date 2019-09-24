@@ -620,29 +620,29 @@ export function Colors(theme: Theme) {
       success: hslToString(hslBaseColor),
 
       // Pulled this 35 lightness value from a dark mode playground for an icon
-      criticalDivider: hslToString({
+      successDivider: hslToString({
         hue,
         saturation,
         lightness: isLightTheme ? 25 : 35,
       }),
 
       // Pulled this 35 lightness value from a dark mode playground for an icon
-      criticalIcon: hslToString({
+      successIcon: hslToString({
         hue,
         saturation,
         lightness: isLightTheme ? 25 : 35,
       }),
-      criticalSurface: hslToString({
+      successSurface: hslToString({
         hue,
         saturation,
         lightness: isLightTheme ? 88 : 12,
       }),
-      criticalSurfaceMuted: hslToString({
+      successSurfaceMuted: hslToString({
         hue,
         saturation,
         lightness: isLightTheme ? 98 : 2,
       }),
-      criticalText: hslToString({
+      successText: hslToString({
         hue,
         saturation,
         lightness: isLightTheme ? 15 : 85,
