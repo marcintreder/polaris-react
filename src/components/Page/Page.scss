@@ -15,6 +15,7 @@ body {
 
 .Page {
   @include page-layout;
+  background-color: var(--surface-background, color('sky', 'light'));
 
   // Ensure bottom margins of any children are contained
   &::after {
